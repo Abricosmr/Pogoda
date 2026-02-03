@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Погода в Перми 🌍</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        body { 
+            background: #0f172a; 
+            background-image: radial-gradient(circle at top right, #1e3a8a, #0f172a);
+            height: 100vh; display: flex; align-items: center; justify-content: center; color: white;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 50px 40px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .city { font-size: 1.2rem; opacity: 0.7; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+        .temp { font-size: 6rem; font-weight: 800; line-height: 1; margin: 15px 0; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status { font-size: 1.1rem; padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 20px; display: inline-block; margin-bottom: 30px; }
+        .details { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; }
+        .detail-item { flex: 1; }
+        .label { font-size: 0.75rem; text-transform: uppercase; opacity: 0.5; margin-bottom: 5px; display: block; }
+        .val { font-size: 1.2rem; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="city">Пермь, Россия</div>
+        <div class="temp" id="temp">--°</div>
+        <div class="status" id="status">Загрузка...</div>
+        
+        <div class="details">
+            <div class="detail-item">
+                <span class="label">Ощущается</span>
+                <span class="val" id="feels">--°</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Влажность</span>
+                <span class="val" id="hum">--%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Используем прямую ссылку на API Open-Meteo
+        const url = "https://api.open-meteo.com";
+
+        async function getWeather() {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Сеть не отвечает');
+                
+                const data = await response.json();
+                
+                // Данные из блока 'current'
+                const current = data.current;
+                
+                document.getElementById('temp').innerText = Math.round(current.temperature_2m) + "°";
+                document.getElementById('feels').innerText = Math.round(current.apparent_temperature) + "°C";
+                document.getElementById('hum').innerText = current.relative_humidity_2m + "%";
+                document.getElementById('status').innerText = current.is_day ? "День ☀️" : "Ночь 🌙";
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('status').innerText = "Ошибка API ❌";
+                document.getElementById('status').style.color = "#f87171";
+            }
+        }
+
+        getWeather();
+        // Обновлять раз в 10 минут
+        setInterval(getWeather, 600000);
+    </script>
+</body>
+</html>
